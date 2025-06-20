@@ -1,16 +1,23 @@
 package com.example.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.entity.Account;
+import com.example.entity.Message;
 import com.example.exception.AuthenticationFailedException;
 import com.example.exception.DuplicateUsernameException;
 import com.example.service.AccountService;
+import com.example.service.MessageService;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller using Spring. The endpoints you will need can be
@@ -24,6 +31,7 @@ public class SocialMediaController {
 
     @Autowired
     private AccountService accountService;
+    private MessageService messageService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerAccount(@RequestBody Account account){
@@ -51,6 +59,21 @@ public class SocialMediaController {
         }catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/messages")
+    public ResponseEntity<?> createMessage(@RequestBody Message message){
+        Message createdMessage = messageService.createMessage(message);
+        if(createdMessage == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid message!");
+        }
+        return ResponseEntity.ok(createdMessage);
+    }
+
+    @GetMapping("/messages")
+    public ResponseEntity<?> getAllMessages(){
+        List<Message> messages = messageService.getAllMessages();
+        return ResponseEntity.ok(messages);
     }
 
 }

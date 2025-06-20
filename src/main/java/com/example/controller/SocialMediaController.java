@@ -1,17 +1,20 @@
 package com.example.controller;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
 import com.example.entity.Account;
 import com.example.entity.Message;
 import com.example.exception.AuthenticationFailedException;
@@ -31,6 +34,8 @@ public class SocialMediaController {
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
     private MessageService messageService;
 
     @PostMapping("/register")
@@ -75,5 +80,45 @@ public class SocialMediaController {
         List<Message> messages = messageService.getAllMessages();
         return ResponseEntity.ok(messages);
     }
+
+    @GetMapping("/messages/{messageId}")
+    public ResponseEntity<?> getMessageById(@PathVariable int messageId){
+        Message message = messageService.getMessageById(messageId);
+        return ResponseEntity.ok(message);
+    }
+
+    @DeleteMapping("/messages/{messageId}")
+     public ResponseEntity<?> deleteById(@PathVariable int messageId){
+        int rowsDeleted =  messageService.deleteById(messageId);
+       
+        if(rowsDeleted == 1){
+            return ResponseEntity.ok(rowsDeleted);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    //Using Key Value, to get the newtext.
+    @PatchMapping("/messages/{messageId}")
+    public ResponseEntity<?> updateMessageText(@PathVariable int messageId, @RequestBody Map<String, String> body) {
+    String newText = body.get("messageText");
+
+    int rowsUpdated = messageService.updateMessageText(messageId, newText);
+
+    if (rowsUpdated == 1) {
+        return ResponseEntity.ok(rowsUpdated); 
+    }
+
+    return ResponseEntity.badRequest().build(); 
+    }
+
+    @GetMapping("/accounts/{accountId}/messages")
+    public ResponseEntity<?> getAllMsgByUser(@PathVariable int accountId){
+        
+        List<Message> messages = messageService.getAllMsgByUser(accountId);
+        return ResponseEntity.ok(messages);
+    }
+
+
 
 }
